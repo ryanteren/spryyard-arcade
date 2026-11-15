@@ -1,1 +1,1538 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="SpryYard Arcade — fast, free mini-games including Snake Combo, Top-Corner Striker Football, and Swish Streak Basketball. No in-app purchases.">
+<title>SpryYard Arcade — Free Skill Mini-Games</title>
+<style>
+:root{
+  --bg:#091020;
+  --panel:#121d33;
+  --panel2:#192845;
+  --line:#2b3f63;
+  --text:#f4f7ff;
+  --muted:#a6b6d4;
+  --lime:#c9fb63;
+  --cyan:#75e4e8;
+  --gold:#ffc878;
+  --pink:#f5a0cf;
+  --red:#ff8b8b;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:radial-gradient(ellipse at 78% -10%,#243a61 0,transparent 42%),var(--bg);
+  color:var(--text);
+  font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:11px;padding:10px 14px;font-weight:700;transition:border-color .15s,transform .1s}
+button:hover{border-color:var(--lime)}
+button:active{transform:scale(.98)}
+button.primary{background:var(--lime);color:#0f1826;border-color:var(--lime)}
+button.small{padding:7px 11px;font-size:12px}
+a{color:var(--cyan)}
+.shell{max-width:1180px;margin:auto;padding:0 20px 64px}
 
+header{
+  position:sticky;top:0;z-index:20;
+  background:#091020eb;backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.bar{max-width:1180px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.brand{font-size:20px;font-weight:950;letter-spacing:1.8px;white-space:nowrap}
+.brand span{color:var(--lime)}
+.brand small{font-size:10px;color:var(--muted);letter-spacing:1.2px;margin-left:4px}
+nav{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+nav button{background:transparent;border-color:transparent;padding:8px 11px;font-size:13px}
+
+.hero{padding:36px 0 22px;display:grid;grid-template-columns:1.25fr .75fr;gap:20px;align-items:center}
+.eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:2px;color:var(--lime);font-weight:800}
+.hero h1{font-size:clamp(34px,5.2vw,58px);line-height:1;letter-spacing:-2px;margin:10px 0 12px}
+.hero p{color:var(--muted);max-width:600px;margin:0}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.card{background:linear-gradient(145deg,var(--panel),#0e182b);border:1px solid var(--line);border-radius:18px;padding:18px}
+.heroStats{border-color:#4b673c}
+.tag{display:inline-block;border:1px solid #435a7d;border-radius:99px;padding:3px 9px;color:var(--cyan);font-size:10px;font-weight:800;letter-spacing:.5px;margin:0 6px 8px 0}
+.tag.green{color:var(--lime);border-color:#5a7538}
+.tag.gold{color:var(--gold);border-color:#715b3c}
+.muted{color:var(--muted)}
+.tiny{font-size:12px}
+
+/* Dedicated fixed-height outer ad containers — never overlap gameplay */
+.adslot{
+  margin:18px 0;
+  min-height:94px;
+  border:1px dashed #4d6287;
+  border-radius:14px;
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  text-align:center;
+  background:#0c1526;
+  color:var(--muted);
+  font-size:12px;
+}
+.adslot .adlabel{font-size:10px;letter-spacing:1.2px;color:var(--gold);font-weight:800;text-transform:uppercase;margin-bottom:3px}
+
+.section{padding-top:28px;scroll-margin-top:78px}
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;margin-bottom:14px;flex-wrap:wrap}
+.head h2{font-size:24px;margin:2px 0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}
+
+.gameCard{
+  background:#0d182b;border:1px solid var(--line);border-radius:16px;padding:16px;
+  display:flex;flex-direction:column;justify-content:space-between;gap:10px;
+  transition:border-color .15s,transform .15s;
+}
+.gameCard.active{border-color:var(--lime);box-shadow:0 0 0 1px #c9fb6344}
+.gameCard .emoji{font-size:28px}
+.gameCard h3{margin:4px 0 4px}
+.gameCard p{margin:0;font-size:13px;color:var(--muted)}
+.gameMeta{display:flex;justify-content:space-between;align-items:center;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:9px;margin-top:4px}
+
+.gameArea{margin-top:16px;display:grid;grid-template-columns:1fr 270px;gap:15px;align-items:start}
+.stage{
+  position:relative;
+  background:#08101f;
+  border:1px solid var(--line);
+  border-radius:18px;
+  padding:14px;
+}
+.stageTop{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:8px}
+.stageTop h3{margin:0;font-size:17px}
+.canvasWrap{
+  position:relative;
+  width:100%;
+  max-width:512px;
+  margin:8px auto;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid #243756;
+  background:#0d182b;
+}
+canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  touch-action:none;
+  user-select:none;
+  -webkit-user-select:none;
+}
+.stageOverlay{
+  position:absolute;inset:0;
+  background:#08101fe0;
+  backdrop-filter:blur(4px);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:20px;gap:10px;
+}
+.stageOverlay h4{margin:0;font-size:24px;color:var(--lime)}
+.stageOverlay p{margin:0;color:var(--muted);max-width:340px;font-size:14px}
+.stageControls{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.dpad{display:grid;grid-template-columns:repeat(3,48px);gap:6px;justify-content:center;margin-top:8px}
+.dpad button{padding:10px 0;font-size:16px}
+.dpad .blank{visibility:hidden}
+.stageHint{text-align:center;font-size:13px;color:var(--muted);margin-top:6px;min-height:20px}
+
+.metricRow{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);padding:9px 0;font-size:13px}
+.metricRow:last-child{border:0}
+
+.footer{
+  margin-top:42px;border-top:1px solid var(--line);padding-top:20px;
+  color:var(--muted);font-size:12px;display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap;align-items:center
+}
+.footerLinks{display:flex;gap:14px;flex-wrap:wrap}
+.linkBtn{background:none;border:0;padding:0;color:var(--cyan);font-size:12px;font-weight:600;text-decoration:underline}
+
+.modalBackdrop{
+  position:fixed;inset:0;z-index:50;background:#050a14cc;backdrop-filter:blur(5px);
+  display:flex;align-items:center;justify-content:center;padding:18px;
+}
+.modalBox{
+  max-width:560px;width:100%;max-height:85vh;overflow:auto;
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:22px;
+}
+.modalBox h3{margin:0 0 10px}
+.modalBox p,.modalBox li{color:var(--muted);font-size:14px}
+
+.cookieBar{
+  position:fixed;left:16px;right:16px;bottom:16px;z-index:40;max-width:920px;margin:auto;
+  background:#121e34f5;border:1px solid var(--line);border-radius:16px;padding:14px 18px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+  box-shadow:0 16px 40px #00000077;
+}
+.hide{display:none!important}
+
+@media(max-width:860px){
+  .hero{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .gameArea{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+  .shell{padding:0 14px 54px}
+  .bar{padding:11px 14px}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="bar">
+    <div class="brand">SPRY<span>YARD</span> <small>ARCADE</small></div>
+    <nav>
+      <button onclick="jump('games')">Play Games</button>
+      <button onclick="jump('discover')">Discover</button>
+      <button id="muteBtn" class="small" onclick="SoundFX.toggleMute()">🔊 Sound: On</button>
+    </nav>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <div>
+      <div class="eyebrow">Skill · Flow · Zero In-App Purchases</div>
+      <h1>Quick arcade breaks.<br><span style="color:var(--lime)">Built to feel crisp.</span></h1>
+      <p>Play three responsive skill mini-games right in your browser—no downloads, no pay-to-win upgrades, and no ads covering your game controls.</p>
+      <div class="actions">
+        <button class="primary" onclick="jump('games')">Play now</button>
+        <button onclick="startGame('snake')">Quick start: Snake Combo</button>
+      </div>
+    </div>
+    <div class="card heroStats">
+      <span class="tag green">100% FREE TO PLAY</span>
+      <span class="tag">NO IAP</span>
+      <div class="metricRow"><span>Snake Combo Best</span><b id="heroBestSnake">0</b></div>
+      <div class="metricRow"><span>Striker Football Best</span><b id="heroBestFootball">0</b></div>
+      <div class="metricRow"><span>Swish Basketball Best</span><b id="heroBestBasketball">0</b></div>
+      <p class="tiny muted" style="margin:10px 0 0">High scores save automatically on your device.</p>
+    </div>
+  </section>
+
+  <!-- TOP OUTER AD CONTAINER (Fixed height, outside gameplay) -->
+  <aside class="adslot" aria-label="Advertisement">
+    <div class="adlabel">Advertisement · Outer Banner Slot (728×90 / Responsive)</div>
+    <div id="topAdSlot">Ad network container ready — never overlaps gameplay or touch controls.</div>
+  </aside>
+
+  <section class="section" id="games">
+    <div class="head">
+      <div>
+        <div class="eyebrow">Mini arcade</div>
+        <h2>Choose a game</h2>
+      </div>
+      <span class="tag green">Desktop &amp; mobile ready</span>
+    </div>
+
+    <div class="grid">
+      <div class="gameCard" id="card-snake">
+        <div>
+          <div class="emoji">🐍</div>
+          <h3>Snake Combo</h3>
+          <p>Tight 16×12 arena with combo multipliers, golden bonus stars, and smooth buffered turns.</p>
+        </div>
+        <div>
+          <div class="gameMeta"><span>Best: <b id="cardBestSnake">0</b></span><span>Arrow / WASD / Swipe</span></div>
+          <button class="primary" style="width:100%;margin-top:10px" onclick="startGame('snake')">Play Snake</button>
+        </div>
+      </div>
+
+      <div class="gameCard" id="card-football">
+        <div>
+          <div class="emoji">⚽</div>
+          <h3>Top-Corner Striker</h3>
+          <p>Pull back to aim, curve, and loft shots past a diving keeper and defender wall into target rings.</p>
+        </div>
+        <div>
+          <div class="gameMeta"><span>Best: <b id="cardBestFootball">0</b></span><span>Drag &amp; Release</span></div>
+          <button class="primary" style="width:100%;margin-top:10px" onclick="startGame('football')">Play Football</button>
+        </div>
+      </div>
+
+      <div class="gameCard" id="card-basketball">
+        <div>
+          <div class="emoji">🏀</div>
+          <h3>Swish Streak</h3>
+          <p>Arc your shots with realistic rim &amp; backboard physics. Chain clean swishes for extra time.</p>
+        </div>
+        <div>
+          <div class="gameMeta"><span>Best: <b id="cardBestBasketball">0</b></span><span>Drag &amp; Release</span></div>
+          <button class="primary" style="width:100%;margin-top:10px" onclick="startGame('basketball')">Play Basketball</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="gameArea">
+      <div class="stage">
+        <div class="stageTop">
+          <h3 id="stageTitle">Snake Combo</h3>
+          <div style="display:flex;gap:8px">
+            <button class="small" onclick="restartActiveGame()">↻ Restart</button>
+          </div>
+        </div>
+
+        <div class="canvasWrap">
+          <canvas id="gameCanvas" width="512" height="384"></canvas>
+          <div id="stageOverlay" class="stageOverlay hide">
+            <h4 id="overlayTitle">Game Over</h4>
+            <p id="overlayDesc">Score: 0</p>
+            <div class="actions" style="justify-content:center">
+              <button class="primary" onclick="restartActiveGame()">Play Again Free</button>
+              <button id="continueAdBtn" class="hide" onclick="triggerRewardedContinue()">▶ Watch Short Ad to Continue</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="stageHint" class="stageHint" aria-live="polite">Use Arrow keys, WASD, or swipe on the board to play.</div>
+        <div id="stageControls" class="stageControls"></div>
+      </div>
+
+      <div class="card">
+        <span class="tag">Your local stats</span>
+        <div class="metricRow"><span>Total rounds played</span><b id="statTotal">0</b></div>
+        <div class="metricRow"><span>Snake rounds</span><b id="statSnake">0</b></div>
+        <div class="metricRow"><span>Football rounds</span><b id="statFootball">0</b></div>
+        <div class="metricRow"><span>Basketball rounds</span><b id="statBasketball">0</b></div>
+        <div class="metricRow"><span>Ad-free gameplay</span><b style="color:var(--lime)">Guaranteed</b></div>
+        <p class="tiny muted" style="margin-top:10px">No accounts required. Progress and cookie preferences stay in your browser.</p>
+      </div>
+    </div>
+
+    <!-- BOTTOM OUTER AD CONTAINER (Fixed height, outside gameplay) -->
+    <aside class="adslot" aria-label="Advertisement">
+      <div class="adlabel">Advertisement · Arcade Break Slot</div>
+      <div id="bottomAdSlot">Non-intrusive passive ad placement — separated from game controls.</div>
+    </aside>
+  </section>
+
+  <section class="section" id="discover">
+    <div class="head">
+      <div>
+        <div class="eyebrow">Curiosity corner</div>
+        <h2>Quick reads between rounds</h2>
+      </div>
+      <span class="tag">Family-friendly editorial</span>
+    </div>
+    <div class="grid">
+      <article class="card">
+        <span class="tag green">Reaction &amp; focus</span>
+        <h3>Why 60-second skill loops feel rewarding</h3>
+        <p>Short rounds with clear risk-reward combos reset attention without dragging into endless grind.</p>
+      </article>
+      <article class="card">
+        <span class="tag">Sport science</span>
+        <h3>The physics behind a bending free kick</h3>
+        <p>Spin creates a pressure difference in the air—curving a ball around a wall even after it leaves your boot.</p>
+      </article>
+      <article class="card">
+        <span class="tag gold">Precision</span>
+        <h3>Why a 45° basketball arc finds more swishes</h3>
+        <p>Higher entry angles widen the effective target area of the rim, turning near-misses into clean drops.</p>
+      </article>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div>
+      <b>SpryYard Arcade</b> · Free browser skill games · No in-app purchases.
+    </div>
+    <div class="footerLinks">
+      <button class="linkBtn" onclick="openModal('privacy')">Privacy Policy</button>
+      <button class="linkBtn" onclick="openModal('terms')">Terms of Use</button>
+      <button class="linkBtn" onclick="openModal('contact')">Contact</button>
+      <button class="linkBtn" onclick="showCookieBanner()">Cookie Settings</button>
+    </div>
+  </footer>
+</main>
+
+<!-- Cookie Consent Banner -->
+<div id="cookieBanner" class="cookieBar hide" role="dialog" aria-label="Cookie preferences">
+  <div style="max-width:560px">
+    <b>Cookie &amp; Privacy Notice</b>
+    <div class="tiny muted">We store high scores locally on your device. If ads are enabled later, you can choose whether to allow personalised ads or keep essential/non-personalised ads only.</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="small" onclick="saveConsent('essential')">Essential Only</button>
+    <button class="small primary" onclick="saveConsent('all')">Accept All</button>
+  </div>
+</div>
+
+<!-- Legal / Contact Modal -->
+<div id="legalModal" class="modalBackdrop hide" onclick="if(event.target===this)closeModal()">
+  <div class="modalBox">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px">
+      <h3 id="modalTitle">Policy</h3>
+      <button class="small" onclick="closeModal()">Close ✕</button>
+    </div>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   STORAGE & CONSENT
+========================================================= */
+const STORAGE_KEY = 'spryyard_arcade_v1';
+const defaultStore = {
+  best: { snake: 0, football: 0, basketball: 0 },
+  sessions: { snake: 0, football: 0, basketball: 0 },
+  muted: false,
+  consent: null
+};
+let store = loadStore();
+
+function loadStore() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!raw) return structuredClone(defaultStore);
+    return {
+      best: { ...defaultStore.best, ...(raw.best || {}) },
+      sessions: { ...defaultStore.sessions, ...(raw.sessions || {}) },
+      muted: !!raw.muted,
+      consent: raw.consent || null
+    };
+  } catch {
+    return structuredClone(defaultStore);
+  }
+}
+
+function saveStore() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(store)); } catch {}
+}
+
+function updateStatsUI() {
+  const b = store.best, s = store.sessions;
+  document.getElementById('heroBestSnake').textContent = b.snake;
+  document.getElementById('heroBestFootball').textContent = b.football;
+  document.getElementById('heroBestBasketball').textContent = b.basketball;
+  document.getElementById('cardBestSnake').textContent = b.snake;
+  document.getElementById('cardBestFootball').textContent = b.football;
+  document.getElementById('cardBestBasketball').textContent = b.basketball;
+  document.getElementById('statSnake').textContent = s.snake;
+  document.getElementById('statFootball').textContent = s.football;
+  document.getElementById('statBasketball').textContent = s.basketball;
+  document.getElementById('statTotal').textContent = s.snake + s.football + s.basketball;
+}
+
+function saveConsent(choice) {
+  store.consent = choice;
+  saveStore();
+  document.getElementById('cookieBanner').classList.add('hide');
+}
+
+function showCookieBanner() {
+  document.getElementById('cookieBanner').classList.remove('hide');
+}
+
+function jump(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+/* =========================================================
+   PASSIVE ADAPTER HOOKS (Ready for AdSense / H5 Games Ads)
+   Never covers gameplay; optional continue only on Game Over
+========================================================= */
+const AdManager = {
+  canContinue: false,
+  onContinueCallback: null,
+  showOptionalContinue(canUse, callback) {
+    this.canContinue = canUse;
+    this.onContinueCallback = callback;
+    const btn = document.getElementById('continueAdBtn');
+    btn.classList.toggle('hide', !canUse);
+  },
+  requestRewarded() {
+    // When Google AdSense H5 Games Ads (adBreak) is connected, replace this
+    // preview timeout with adBreak({ type: 'reward', beforeReward: ..., adDismissed: ..., adViewed: ... })
+    const btn = document.getElementById('continueAdBtn');
+    btn.disabled = true;
+    btn.textContent = 'Loading short break…';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.textContent = '▶ Watch Short Ad to Continue';
+      if (this.onContinueCallback) this.onContinueCallback();
+    }, 900);
+  }
+};
+
+function triggerRewardedContinue() {
+  AdManager.requestRewarded();
+}
+
+/* =========================================================
+   WEB AUDIO SYNTHESIZER (Zero external audio files needed)
+========================================================= */
+const SoundFX = {
+  ctx: null,
+  ensure() {
+    if (store.muted) return null;
+    try {
+      if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (this.ctx.state === 'suspended') this.ctx.resume();
+      return this.ctx;
+    } catch { return null; }
+  },
+  tone(freq, dur, type = 'sine', vol = 0.08, slideTo = null) {
+    const ctx = this.ensure();
+    if (!ctx) return;
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, now);
+    if (slideTo) osc.frequency.exponentialRampToValueAtTime(slideTo, now + dur);
+    gain.gain.setValueAtTime(vol, now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + dur);
+  },
+  eat() { this.tone(520, 0.09, 'triangle', 0.09, 760); },
+  bonus() { this.tone(660, 0.12, 'sine', 0.1, 1080); },
+  kick() { this.tone(170, 0.09, 'triangle', 0.14, 70); },
+  goal() {
+    this.tone(523, 0.12, 'triangle', 0.1);
+    setTimeout(() => this.tone(659, 0.12, 'triangle', 0.1), 90);
+    setTimeout(() => this.tone(784, 0.22, 'triangle', 0.12), 180);
+  },
+  rim() { this.tone(240, 0.08, 'square', 0.06, 150); },
+  swish() { this.tone(620, 0.14, 'sine', 0.09, 980); },
+  fail() { this.tone(240, 0.25, 'sawtooth', 0.07, 110); },
+  toggleMute() {
+    store.muted = !store.muted;
+    saveStore();
+    document.getElementById('muteBtn').textContent = store.muted ? '🔇 Sound: Off' : '🔊 Sound: On';
+  }
+};
+
+/* =========================================================
+   SHARED CANVAS, INPUT & GAME LOOP MANAGER
+========================================================= */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width;   // 512
+const H = canvas.height;  // 384
+
+let activeGameKey = 'snake';
+let activeGame = null;
+let rafId = null;
+let lastFrameTime = 0;
+let particles = [];
+let floatingTexts = [];
+
+function spawnParticles(x, y, color, count = 12) {
+  for (let i = 0; i < count; i++) {
+    const ang = Math.random() * Math.PI * 2;
+    const spd = 50 + Math.random() * 140;
+    particles.push({
+      x, y,
+      vx: Math.cos(ang) * spd,
+      vy: Math.sin(ang) * spd,
+      life: 0.45 + Math.random() * 0.25,
+      maxLife: 0.7,
+      size: 2 + Math.random() * 3.5,
+      color
+    });
+  }
+}
+
+function spawnFloatText(x, y, text, color = '#c9fb63') {
+  floatingTexts.push({ x, y, text, color, life: 0.9, maxLife: 0.9 });
+}
+
+function updateAndDrawFX(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vx *= 0.94;
+    p.vy *= 0.94;
+    p.life -= dt;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, p.life / p.maxLife);
+    ctx.fillStyle = p.color;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+  }
+  for (let i = floatingTexts.length - 1; i >= 0; i--) {
+    const f = floatingTexts[i];
+    f.y -= 34 * dt;
+    f.life -= dt;
+    if (f.life <= 0) { floatingTexts.splice(i, 1); continue; }
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, f.life / f.maxLife);
+    ctx.font = 'bold 16px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, f.y);
+    ctx.restore();
+  }
+}
+
+function showOverlay(title, desc, canContinue = false, continueFn = null) {
+  document.getElementById('overlayTitle').textContent = title;
+  document.getElementById('overlayDesc').textContent = desc;
+  AdManager.showOptionalContinue(canContinue, () => {
+    hideOverlay();
+    if (continueFn) continueFn();
+  });
+  document.getElementById('stageOverlay').classList.remove('hide');
+}
+
+function hideOverlay() {
+  document.getElementById('stageOverlay').classList.add('hide');
+}
+
+function recordScore(key, score) {
+  if (score > store.best[key]) {
+    store.best[key] = score;
+    saveStore();
+    updateStatsUI();
+    return true;
+  }
+  return false;
+}
+
+/* =========================================================
+   GAME 1: SNAKE COMBO (16x12 Grid, Buffered Input, Golden Stars)
+========================================================= */
+function createSnakeGame() {
+  const COLS = 16, ROWS = 12, CELL = 32;
+  let body = [{ x: 4, y: 6 }, { x: 3, y: 6 }, { x: 2, y: 6 }];
+  let dir = { x: 1, y: 0 };
+  let queue = [];
+  let food = null;
+  let bonus = null;
+  let score = 0;
+  let combo = 1;
+  let comboTimer = 0;
+  let applesEaten = 0;
+  let moveAccum = 0;
+  let dead = false;
+  let continuedOnce = false;
+  let pulseTime = 0;
+  let swipeStart = null;
+
+  function freeCell() {
+    const open = [];
+    for (let y = 0; y < ROWS; y++) {
+      for (let x = 0; x < COLS; x++) {
+        const hitBody = body.some(p => p.x === x && p.y === y);
+        const hitFood = food && food.x === x && food.y === y;
+        const hitBonus = bonus && bonus.x === x && bonus.y === y;
+        if (!hitBody && !hitFood && !hitBonus) open.push({ x, y });
+      }
+    }
+    return open.length ? open[Math.floor(Math.random() * open.length)] : null;
+  }
+
+  food = freeCell();
+
+  function queueDir(nx, ny) {
+    if (dead) return;
+    const ref = queue.length ? queue[queue.length - 1] : dir;
+    if ((nx === -ref.x && ny === -ref.y) || (nx === ref.x && ny === ref.y)) return;
+    if (queue.length < 2) queue.push({ x: nx, y: ny });
+  }
+
+  function stepSpeed() {
+    return Math.max(0.082, 0.145 - Math.min(score, 600) * 0.0001);
+  }
+
+  function triggerGameOver() {
+    dead = true;
+    SoundFX.fail();
+    const isBest = recordScore('snake', score);
+    showOverlay(
+      isBest ? 'New High Score!' : 'Run Finished',
+      `Final score: ${score} · Best: ${store.best.snake}`,
+      !continuedOnce && score > 0,
+      () => {
+        continuedOnce = true;
+        dead = false;
+        // Trim back safely if wall-hit and reset to center lane
+        const len = Math.max(3, Math.min(body.length, 8));
+        body = [];
+        for (let i = 0; i < len; i++) body.push({ x: Math.max(0, 6 - i), y: 6 });
+        dir = { x: 1, y: 0 };
+        queue = [];
+        if (!food) food = freeCell();
+      }
+    );
+  }
+
+  function tick() {
+    if (queue.length) dir = queue.shift();
+    const head = { x: body[0].x + dir.x, y: body[0].y + dir.y };
+    if (head.x < 0 || head.y < 0 || head.x >= COLS || head.y >= ROWS || body.some(p => p.x === head.x && p.y === head.y)) {
+      triggerGameOver();
+      return;
+    }
+    body.unshift(head);
+
+    if (food && head.x === food.x && head.y === food.y) {
+      applesEaten++;
+      if (comboTimer > 0) combo = Math.min(5, combo + 1);
+      else combo = 1;
+      comboTimer = 4.2;
+      const pts = 10 * combo;
+      score += pts;
+      SoundFX.eat();
+      spawnParticles(head.x * CELL + CELL / 2, head.y * CELL + CELL / 2, '#c9fb63', 14);
+      spawnFloatText(head.x * CELL + CELL / 2, head.y * CELL + 6, `+${pts}${combo > 1 ? ' x' + combo : ''}`, '#c9fb63');
+      food = freeCell();
+      if (!food) {
+        score += 100;
+        recordScore('snake', score);
+        dead = true;
+        SoundFX.goal();
+        showOverlay('Board Cleared!', `Incredible! Score: ${score}`, false);
+        return;
+      }
+      if (!bonus && applesEaten % 4 === 0) {
+        const bc = freeCell();
+        if (bc) bonus = { x: bc.x, y: bc.y, ttl: 6.0 };
+      }
+    } else if (bonus && head.x === bonus.x && head.y === bonus.y) {
+      const pts = 35 * combo;
+      score += pts;
+      comboTimer = Math.max(comboTimer, 3.5);
+      SoundFX.bonus();
+      spawnParticles(head.x * CELL + CELL / 2, head.y * CELL + CELL / 2, '#ffc878', 20);
+      spawnFloatText(head.x * CELL + CELL / 2, head.y * CELL + 6, `BONUS +${pts}!`, '#ffc878');
+      bonus = null;
+      body.pop();
+    } else {
+      body.pop();
+    }
+  }
+
+  return {
+    title: 'Snake Combo',
+    hint: 'Arrow keys / WASD or swipe to steer. Eat quickly to build x5 combos!',
+    controlsHTML: `
+      <div class="dpad" aria-label="Touch direction pad">
+        <span class="blank"></span><button onclick="activeGame && activeGame.inputDir(0,-1)">▲</button><span class="blank"></span>
+        <button onclick="activeGame && activeGame.inputDir(-1,0)">◀</button><button onclick="activeGame && activeGame.inputDir(0,1)">▼</button><button onclick="activeGame && activeGame.inputDir(1,0)">▶</button>
+      </div>`,
+    inputDir: queueDir,
+    onKey(e) {
+      const map = {
+        ArrowUp: [0, -1], w: [0, -1], W: [0, -1],
+        ArrowDown: [0, 1], s: [0, 1], S: [0, 1],
+        ArrowLeft: [-1, 0], a: [-1, 0], A: [-1, 0],
+        ArrowRight: [1, 0], d: [1, 0], D: [1, 0]
+      };
+      if (map[e.key]) { e.preventDefault(); queueDir(...map[e.key]); }
+    },
+    onPointerDown(x, y) { swipeStart = { x, y }; },
+    onPointerMove() {},
+    onPointerUp(x, y) {
+      if (!swipeStart) return;
+      const dx = x - swipeStart.x, dy = y - swipeStart.y;
+      swipeStart = null;
+      if (Math.hypot(dx, dy) < 18) return;
+      if (Math.abs(dx) > Math.abs(dy)) queueDir(dx > 0 ? 1 : -1, 0);
+      else queueDir(0, dy > 0 ? 1 : -1);
+    },
+    update(dt) {
+      pulseTime += dt;
+      if (dead) return;
+      if (comboTimer > 0) {
+        comboTimer -= dt;
+        if (comboTimer <= 0) { combo = 1; comboTimer = 0; }
+      }
+      if (bonus) {
+        bonus.ttl -= dt;
+        if (bonus.ttl <= 0) bonus = null;
+      }
+      moveAccum += dt;
+      const spd = stepSpeed();
+      while (moveAccum >= spd) {
+        moveAccum -= spd;
+        tick();
+        if (dead) break;
+      }
+    },
+    draw() {
+      // Checkerboard subtle arena
+      for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+          ctx.fillStyle = (x + y) % 2 === 0 ? '#0f1b30' : '#122038';
+          ctx.fillRect(x * CELL, y * CELL, CELL, CELL);
+        }
+      }
+
+      // Food glow
+      if (food) {
+        const cx = food.x * CELL + CELL / 2;
+        const cy = food.y * CELL + CELL / 2;
+        const r = 10 + Math.sin(pulseTime * 7) * 1.8;
+        ctx.fillStyle = '#ff6b8b44';
+        ctx.beginPath(); ctx.arc(cx, cy, r + 5, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ff6b8b';
+        ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff5';
+        ctx.beginPath(); ctx.arc(cx - 3, cy - 3, 3, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Bonus star
+      if (bonus) {
+        const cx = bonus.x * CELL + CELL / 2;
+        const cy = bonus.y * CELL + CELL / 2;
+        const pulse = 1 + Math.sin(pulseTime * 11) * 0.12;
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(pulse, pulse);
+        ctx.fillStyle = '#ffc878';
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const rad = i % 2 === 0 ? 12 : 5;
+          const a = (i * Math.PI) / 5 - Math.PI / 2;
+          if (i === 0) ctx.moveTo(Math.cos(a) * rad, Math.sin(a) * rad);
+          else ctx.lineTo(Math.cos(a) * rad, Math.sin(a) * rad);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+
+      // Rounded snake segments
+      for (let i = body.length - 1; i >= 0; i--) {
+        const seg = body[i];
+        const t = i / Math.max(1, body.length - 1);
+        const pad = i === 0 ? 2 : 3 + t * 2;
+        const x = seg.x * CELL + pad;
+        const y = seg.y * CELL + pad;
+        const size = CELL - pad * 2;
+        ctx.fillStyle = i === 0 ? '#c9fb63' : `hsl(${92 + t * 55}, 82%, ${64 - t * 20}%)`;
+        ctx.beginPath();
+        ctx.roundRect(x, y, size, size, 8);
+        ctx.fill();
+
+        if (i === 0) {
+          // Eyes facing current direction
+          const cx = seg.x * CELL + CELL / 2;
+          const cy = seg.y * CELL + CELL / 2;
+          const ex = dir.x * 5, ey = dir.y * 5;
+          const px = -dir.y * 5, py = dir.x * 5;
+          ctx.fillStyle = '#091020';
+          ctx.beginPath(); ctx.arc(cx + ex + px, cy + ey + py, 2.7, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(cx + ex - px, cy + ey - py, 2.7, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+
+      // HUD
+      ctx.fillStyle = '#070d1acc';
+      ctx.fillRect(0, 0, W, 30);
+      ctx.fillStyle = '#f4f7ff';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Score: ${score}`, 12, 20);
+      if (combo > 1 && comboTimer > 0) {
+        ctx.fillStyle = '#c9fb63';
+        ctx.fillText(`COMBO x${combo}`, 120, 20);
+        ctx.fillStyle = '#26395a';
+        ctx.fillRect(212, 11, 70, 8);
+        ctx.fillStyle = '#c9fb63';
+        ctx.fillRect(212, 11, 70 * (comboTimer / 4.2), 8);
+      }
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#a6b6d4';
+      ctx.fillText(`Best: ${Math.max(score, store.best.snake)}`, W - 12, 20);
+    }
+  };
+}
+
+/* =========================================================
+   GAME 2: TOP-CORNER STRIKER (Football Drag-to-Aim + Keeper)
+========================================================= */
+function createFootballGame() {
+  const GOAL = { left: 106, right: 406, top: 48, bottom: 164 };
+  let score = 0;
+  let streak = 0;
+  let lives = 3;
+  let continuedOnce = false;
+  let netShake = 0;
+  let phase = 'aim'; // 'aim' | 'flight' | 'resolve'
+  let resolveTimer = 0;
+  let bannerMsg = '';
+
+  const ball = { x: 256, y: 330, z: 0, vx: 0, vy: 0, vz: 0, curve: 0, r: 12, trail: [] };
+  const keeper = { x: 256, y: 152, vx: 95, targetX: 256, jumpZ: 0, diveDir: 0 };
+  let targets = [];
+  let wall = null;
+  let dragStart = null;
+  let dragCurr = null;
+
+  function setupRound() {
+    phase = 'aim';
+    ball.x = 226 + Math.random() * 60;
+    ball.y = 330;
+    ball.z = 0;
+    ball.vx = 0; ball.vy = 0; ball.vz = 0; ball.curve = 0;
+    ball.trail = [];
+    keeper.x = 256;
+    keeper.jumpZ = 0;
+    keeper.diveDir = 0;
+    keeper.vx = (Math.random() < 0.5 ? -1 : 1) * (85 + Math.min(110, streak * 14));
+
+    // Spawn 1 or 2 top-corner target rings
+    targets = [{ x: GOAL.left + 38, y: GOAL.top + 32, r: 21, pts: 25 }];
+    if (streak >= 1) targets.push({ x: GOAL.right - 38, y: GOAL.top + 32, r: 21, pts: 25 });
+    else if (Math.random() < 0.5) targets = [{ x: GOAL.right - 38, y: GOAL.top + 32, r: 21, pts: 25 }];
+
+    // Add defender wall on higher streaks
+    wall = streak >= 2 ? { x: 215 + Math.random() * 82, y: 238, w: 58, h: 42 } : null;
+  }
+
+  setupRound();
+
+  function shootFromDrag(dx, dy) {
+    // Pull-back slingshot vector: pulling down-left shoots up-right
+    const len = Math.hypot(dx, dy);
+    if (len < 16) return;
+    const clamped = Math.min(140, len);
+    const nx = -dx / len;
+    const ny = -dy / len;
+    if (ny > -0.25) return; // Must aim forward toward goal
+
+    const power = 430 + (clamped / 140) * 340;
+    ball.vx = nx * power * 0.95;
+    ball.vy = ny * power;
+    ball.vz = 150 + (clamped / 140) * 235; // Loft toward top corners
+    ball.curve = -nx * 165; // Natural swerve
+    phase = 'flight';
+    SoundFX.kick();
+
+    // Keeper commits based on shot angle with human reaction imperfection
+    const guessOffset = (Math.random() - 0.5) * 145;
+    const predictedX = Math.max(GOAL.left + 26, Math.min(GOAL.right - 26, ball.x + ball.vx * 0.35 + guessOffset));
+    keeper.targetX = predictedX;
+    keeper.diveDir = predictedX > keeper.x ? 1 : -1;
+  }
+
+  function finishShot(scored, text, color) {
+    phase = 'resolve';
+    resolveTimer = 1.05;
+    bannerMsg = text;
+    if (!scored) {
+      lives--;
+      streak = 0;
+      SoundFX.fail();
+    }
+    spawnFloatText(256, 200, text, color);
+  }
+
+  return {
+    title: 'Top-Corner Striker',
+    hint: 'Pull back anywhere on the pitch & release to curve shots past the keeper!',
+    controlsHTML: '<span class="tiny muted">Tip: Stronger pull = higher loft to clear the defender wall &amp; hit top corners.</span>',
+    onKey() {},
+    onPointerDown(x, y) {
+      if (phase !== 'aim' || lives <= 0) return;
+      dragStart = { x, y };
+      dragCurr = { x, y };
+    },
+    onPointerMove(x, y) {
+      if (dragStart) dragCurr = { x, y };
+    },
+    onPointerUp(x, y) {
+      if (!dragStart) return;
+      const dx = x - dragStart.x;
+      const dy = y - dragStart.y;
+      dragStart = null;
+      dragCurr = null;
+      if (phase === 'aim') shootFromDrag(dx, dy);
+    },
+    update(dt) {
+      if (netShake > 0) netShake = Math.max(0, netShake - dt * 3);
+
+      if (phase === 'aim') {
+        keeper.x += keeper.vx * dt;
+        if (keeper.x < GOAL.left + 40) { keeper.x = GOAL.left + 40; keeper.vx = Math.abs(keeper.vx); }
+        if (keeper.x > GOAL.right - 40) { keeper.x = GOAL.right - 40; keeper.vx = -Math.abs(keeper.vx); }
+      } else if (phase === 'flight') {
+        ball.trail.push({ x: ball.x, y: ball.y - ball.z, r: Math.max(4, ball.r * 0.65) });
+        if (ball.trail.length > 10) ball.trail.shift();
+
+        ball.vx += ball.curve * dt;
+        ball.x += ball.vx * dt;
+        ball.y += ball.vy * dt;
+        ball.vz -= 420 * dt;
+        ball.z = Math.max(0, ball.z + ball.vz * dt);
+
+        // Keeper dive toward target
+        const kDiff = keeper.targetX - keeper.x;
+        const diveSpeed = 230 + Math.min(120, streak * 12);
+        keeper.x += Math.sign(kDiff) * Math.min(Math.abs(kDiff), diveSpeed * dt);
+        keeper.jumpZ = Math.min(36, keeper.jumpZ + 110 * dt);
+
+        // Check defender wall block
+        if (wall && Math.abs(ball.y - wall.y) < 12 && ball.x > wall.x && ball.x < wall.x + wall.w && ball.z < wall.h) {
+          ball.vy = Math.abs(ball.vy) * 0.45;
+          SoundFX.rim();
+          finishShot(false, 'BLOCKED BY WALL!', '#ff8b8b');
+          return;
+        }
+
+        // Crossed goal line
+        if (ball.y <= GOAL.bottom - 6) {
+          const screenY = ball.y - ball.z;
+          // Keeper reach check
+          const kDist = Math.hypot(ball.x - keeper.x, screenY - (keeper.y - keeper.jumpZ));
+          const inGoalMouth = ball.x > GOAL.left + 8 && ball.x < GOAL.right - 8 && screenY > GOAL.top + 8 && screenY < GOAL.bottom + 4;
+
+          if (inGoalMouth && kDist < 31) {
+            SoundFX.rim();
+            spawnParticles(ball.x, screenY, '#ffc878', 12);
+            finishShot(false, 'SAVED BY KEEPER!', '#ff8b8b');
+          } else if (inGoalMouth) {
+            streak++;
+            let pts = 15 + streak * 5;
+            let hitTarget = false;
+            for (const t of targets) {
+              if (Math.hypot(ball.x - t.x, screenY - t.y) <= t.r + 10) {
+                pts += t.pts;
+                hitTarget = true;
+              }
+            }
+            score += pts;
+            netShake = 1;
+            SoundFX.goal();
+            spawnParticles(ball.x, screenY, hitTarget ? '#ffc878' : '#c9fb63', 24);
+            finishShot(true, hitTarget ? `TOP CORNER! +${pts}` : `GOAL! +${pts}`, hitTarget ? '#ffc878' : '#c9fb63');
+          } else {
+            SoundFX.rim();
+            finishShot(false, screenY <= GOAL.top + 8 ? 'OVER THE BAR!' : 'WIDE!', '#ff8b8b');
+          }
+        }
+      } else if (phase === 'resolve') {
+        resolveTimer -= dt;
+        if (resolveTimer <= 0) {
+          if (lives <= 0) {
+            const isBest = recordScore('football', score);
+            showOverlay(
+              isBest ? 'New High Score!' : 'Full Time',
+              `Final score: ${score} · Best: ${store.best.football}`,
+              !continuedOnce && score > 0,
+              () => {
+                continuedOnce = true;
+                lives = 2;
+                setupRound();
+              }
+            );
+          } else {
+            setupRound();
+          }
+        }
+      }
+    },
+    draw() {
+      // Sky & stadium backdrop
+      ctx.fillStyle = '#0d192d';
+      ctx.fillRect(0, 0, W, 155);
+      // Pitch stripes
+      for (let i = 0; i < 6; i++) {
+        ctx.fillStyle = i % 2 === 0 ? '#145a41' : '#18664a';
+        ctx.fillRect(0, 155 + i * 40, W, 40);
+      }
+      // Penalty box lines
+      ctx.strokeStyle = '#ffffff66';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(60, 155, W - 120, 130);
+
+      // Goal net
+      const shakeX = netShake ? Math.sin(performance.now() * 0.06) * 4 * netShake : 0;
+      ctx.fillStyle = '#0a162888';
+      ctx.fillRect(GOAL.left, GOAL.top, GOAL.right - GOAL.left, GOAL.bottom - GOAL.top);
+      ctx.strokeStyle = '#ffffff2b';
+      ctx.lineWidth = 1;
+      for (let gx = GOAL.left + 15; gx < GOAL.right; gx += 18) {
+        ctx.beginPath(); ctx.moveTo(gx + shakeX, GOAL.top); ctx.lineTo(gx, GOAL.bottom); ctx.stroke();
+      }
+      for (let gy = GOAL.top + 14; gy < GOAL.bottom; gy += 16) {
+        ctx.beginPath(); ctx.moveTo(GOAL.left + shakeX, gy); ctx.lineTo(GOAL.right + shakeX, gy); ctx.stroke();
+      }
+
+      // Corner bonus targets
+      for (const t of targets) {
+        ctx.strokeStyle = '#ffc878';
+        ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(t.x, t.y, t.r, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#ffc87833';
+        ctx.fill();
+        ctx.fillStyle = '#ffc878';
+        ctx.font = 'bold 11px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText(`+${t.pts}`, t.x, t.y + 4);
+      }
+
+      // Goal frame
+      ctx.strokeStyle = '#f4f7ff';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.moveTo(GOAL.left, GOAL.bottom);
+      ctx.lineTo(GOAL.left, GOAL.top);
+      ctx.lineTo(GOAL.right, GOAL.top);
+      ctx.lineTo(GOAL.right, GOAL.bottom);
+      ctx.stroke();
+
+      // Goalkeeper
+      const ky = keeper.y - keeper.jumpZ;
+      ctx.fillStyle = '#00000044';
+      ctx.beginPath(); ctx.ellipse(keeper.x, GOAL.bottom + 2, 18, 5, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#ff9f43';
+      ctx.beginPath(); ctx.roundRect(keeper.x - 14, ky - 22, 28, 34, 8); ctx.fill();
+      ctx.fillStyle = '#ffd8b0';
+      ctx.beginPath(); ctx.arc(keeper.x, ky - 29, 9, 0, Math.PI * 2); ctx.fill();
+      // Gloves
+      ctx.fillStyle = '#c9fb63';
+      ctx.beginPath(); ctx.arc(keeper.x - 19, ky - 14, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(keeper.x + 19, ky - 14, 7, 0, Math.PI * 2); ctx.fill();
+
+      // Defender wall
+      if (wall) {
+        ctx.fillStyle = '#48608a';
+        ctx.beginPath(); ctx.roundRect(wall.x, wall.y - wall.h, wall.w, wall.h, 8); ctx.fill();
+        ctx.fillStyle = '#f4f7ff';
+        ctx.font = 'bold 10px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('WALL', wall.x + wall.w / 2, wall.y - 16);
+      }
+
+      // Aim trajectory guide
+      if (phase === 'aim' && dragStart && dragCurr) {
+        const dx = dragCurr.x - dragStart.x;
+        const dy = dragCurr.y - dragStart.y;
+        const len = Math.hypot(dx, dy);
+        if (len > 14 && -dy / len > 0.25) {
+          const clamped = Math.min(140, len);
+          const nx = -dx / len, ny = -dy / len;
+          ctx.strokeStyle = '#c9fb63cc';
+          ctx.lineWidth = 3;
+          ctx.setLineDash([7, 7]);
+          ctx.beginPath();
+          ctx.moveTo(ball.x, ball.y);
+          ctx.lineTo(ball.x + nx * clamped * 1.45, ball.y + ny * clamped * 1.45);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
+      }
+
+      // Ball trail
+      for (const tr of ball.trail) {
+        ctx.fillStyle = '#ffffff2a';
+        ctx.beginPath(); ctx.arc(tr.x, tr.y, tr.r, 0, Math.PI * 2); ctx.fill();
+      }
+
+      // Ball shadow & ball
+      const scale = Math.max(0.65, 1 - (330 - ball.y) * 0.0014);
+      ctx.fillStyle = '#00000055';
+      ctx.beginPath(); ctx.ellipse(ball.x, ball.y + 4, ball.r * scale, 4, 0, 0, Math.PI * 2); ctx.fill();
+
+      const drawY = ball.y - ball.z;
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath(); ctx.arc(ball.x, drawY, ball.r * scale, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#1b273b';
+      ctx.beginPath(); ctx.arc(ball.x - 2, drawY - 1, 3.5 * scale, 0, Math.PI * 2); ctx.fill();
+
+      // HUD
+      ctx.fillStyle = '#070d1acc';
+      ctx.fillRect(0, 0, W, 30);
+      ctx.fillStyle = '#f4f7ff';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Score: ${score}`, 12, 20);
+      if (streak > 0) {
+        ctx.fillStyle = '#ffc878';
+        ctx.fillText(`Streak: ${streak}`, 115, 20);
+      }
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#ff8b8b';
+      ctx.fillText('❤️'.repeat(Math.max(0, lives)), W - 12, 20);
+    }
+  };
+}
+
+/* =========================================================
+   GAME 3: SWISH STREAK (Basketball Arc + Rim Physics)
+========================================================= */
+function createBasketballGame() {
+  const GRAVITY = 680;
+  let score = 0;
+  let streak = 0;
+  let timeLeft = 60;
+  let continuedOnce = false;
+  let gameOver = false;
+  let hoopBaseY = 165;
+  let hoopPhase = 0;
+  let netSway = 0;
+
+  const rim = { leftX: 392, rightX: 438, y: 165, r: 5 };
+  const board = { x: 446, top: 96, bottom: 192 };
+
+  const ball = {
+    x: 115, y: 286, vx: 0, vy: 0, r: 14,
+    inAir: false, prevY: 286, rimHits: 0, scoredThisShot: false, trail: []
+  };
+
+  let dragStart = null;
+  let dragCurr = null;
+
+  function resetBallPosition() {
+    ball.inAir = false;
+    ball.vx = 0; ball.vy = 0;
+    ball.rimHits = 0;
+    ball.scoredThisShot = false;
+    ball.trail = [];
+    // Vary shot position slightly after baskets for engaging variety
+    ball.x = 76 + Math.random() * 115;
+    ball.y = 248 + Math.random() * 68;
+    ball.prevY = ball.y;
+  }
+
+  function computeLaunch(dx, dy) {
+    const len = Math.hypot(dx, dy);
+    if (len < 15) return null;
+    const clamped = Math.min(150, len);
+    const nx = -dx / len;
+    const ny = -dy / len;
+    if (nx < 0.08 && ny > -0.1) return null;
+    const speed = 340 + (clamped / 150) * 510;
+    return { vx: nx * speed, vy: ny * speed };
+  }
+
+  function collideCircle(cx, cy, cr) {
+    const dx = ball.x - cx;
+    const dy = ball.y - cy;
+    const dist = Math.hypot(dx, dy);
+    const minDist = ball.r + cr;
+    if (dist < minDist && dist > 0.001) {
+      const nx = dx / dist;
+      const ny = dy / dist;
+      ball.x = cx + nx * minDist;
+      ball.y = cy + ny * minDist;
+      const dot = ball.vx * nx + ball.vy * ny;
+      if (dot < 0) {
+        ball.vx = (ball.vx - 2 * dot * nx) * 0.68;
+        ball.vy = (ball.vy - 2 * dot * ny) * 0.68;
+        ball.rimHits++;
+        SoundFX.rim();
+      }
+    }
+  }
+
+  return {
+    title: 'Swish Streak',
+    hint: 'Pull back anywhere on court & release to shoot! Clean swishes add bonus seconds.',
+    controlsHTML: '<span class="tiny muted">Chain 3+ baskets for "On Fire" multipliers and extra clock time.</span>',
+    onKey() {},
+    onPointerDown(x, y) {
+      if (gameOver || ball.inAir) return;
+      dragStart = { x, y };
+      dragCurr = { x, y };
+    },
+    onPointerMove(x, y) {
+      if (dragStart) dragCurr = { x, y };
+    },
+    onPointerUp(x, y) {
+      if (!dragStart) return;
+      const launch = computeLaunch(x - dragStart.x, y - dragStart.y);
+      dragStart = null;
+      dragCurr = null;
+      if (launch && !ball.inAir && !gameOver) {
+        ball.vx = launch.vx;
+        ball.vy = launch.vy;
+        ball.inAir = true;
+        SoundFX.kick();
+      }
+    },
+    update(dt) {
+      if (netSway > 0) netSway = Math.max(0, netSway - dt * 2.5);
+      if (gameOver) return;
+
+      timeLeft -= dt;
+      if (timeLeft <= 0) {
+        timeLeft = 0;
+        gameOver = true;
+        SoundFX.fail();
+        const isBest = recordScore('basketball', score);
+        showOverlay(
+          isBest ? 'New High Score!' : 'Buzzer Sounded!',
+          `Final score: ${score} · Best: ${store.best.basketball}`,
+          !continuedOnce && score > 0,
+          () => {
+            continuedOnce = true;
+            gameOver = false;
+            timeLeft = 18;
+            resetBallPosition();
+          }
+        );
+        return;
+      }
+
+      // Gently move hoop once player reaches 8+ points
+      if (score >= 8) {
+        hoopPhase += dt * 1.6;
+        rim.y = hoopBaseY + Math.sin(hoopPhase) * 24;
+        board.top = rim.y - 69;
+        board.bottom = rim.y + 27;
+      }
+
+      if (!ball.inAir) return;
+
+      ball.trail.push({ x: ball.x, y: ball.y });
+      if (ball.trail.length > 11) ball.trail.shift();
+
+      // 4 physics sub-steps prevent rim tunneling
+      const sub = 4;
+      const sdt = dt / sub;
+      for (let s = 0; s < sub; s++) {
+        ball.prevY = ball.y;
+        ball.vy += GRAVITY * sdt;
+        ball.x += ball.vx * sdt;
+        ball.y += ball.vy * sdt;
+
+        // Backboard collision
+        if (ball.x + ball.r > board.x && ball.x - ball.r < board.x + 10 && ball.y > board.top && ball.y < board.bottom) {
+          ball.x = board.x - ball.r;
+          ball.vx = -Math.abs(ball.vx) * 0.72;
+          SoundFX.rim();
+        }
+
+        // Rim lip collisions
+        collideCircle(rim.leftX, rim.y, rim.r);
+        collideCircle(rim.rightX, rim.y, rim.r);
+
+        // Score check: passing cleanly downward through hoop opening
+        if (!ball.scoredThisShot && ball.prevY < rim.y && ball.y >= rim.y && ball.vy > 0 &&
+            ball.x > rim.leftX + 5 && ball.x < rim.rightX - 5) {
+          ball.scoredThisShot = true;
+          streak++;
+          const swish = ball.rimHits === 0;
+          const mult = streak >= 3 ? 2 : 1;
+          const pts = (swish ? 3 : 2) * mult;
+          const bonusTime = swish ? 2 : 1;
+          score += pts;
+          timeLeft = Math.min(60, timeLeft + bonusTime);
+          netSway = 1;
+          if (swish) SoundFX.swish(); else SoundFX.goal();
+          spawnParticles((rim.leftX + rim.rightX) / 2, rim.y + 10, swish ? '#ffc878' : '#c9fb63', swish ? 24 : 14);
+          spawnFloatText(rim.leftX + 20, rim.y - 20, swish ? `SWISH! +${pts} (+${bonusTime}s)` : `+${pts} (+${bonusTime}s)`, swish ? '#ffc878' : '#c9fb63');
+        }
+      }
+
+      // Reset when off floor or out of bounds
+      if (ball.y > H - 22 || ball.x > W + 30 || ball.x < -30) {
+        if (!ball.scoredThisShot) streak = 0;
+        resetBallPosition();
+      }
+    },
+    draw() {
+      // Arena wall & hardwood floor
+      ctx.fillStyle = '#0e192d';
+      ctx.fillRect(0, 0, W, H - 56);
+      ctx.fillStyle = '#6c4829';
+      ctx.fillRect(0, H - 56, W, 56);
+      ctx.fillStyle = '#855a35';
+      ctx.fillRect(0, H - 56, W, 4);
+
+      // Hoop pole & backboard
+      ctx.fillStyle = '#2d3f61';
+      ctx.fillRect(board.x + 12, rim.y - 10, 12, H - 56 - (rim.y - 10));
+      ctx.fillStyle = '#e8f0ff';
+      ctx.fillRect(board.x, board.top, 9, board.bottom - board.top);
+      ctx.strokeStyle = '#ff6b4a';
+      ctx.lineWidth = 2;
+      ctx.strokeRect(board.x, rim.y - 24, 9, 26);
+
+      // Net mesh
+      const sway = netSway ? Math.sin(performance.now() * 0.05) * 6 * netSway : 0;
+      ctx.strokeStyle = '#ffffffaa';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(rim.leftX, rim.y);
+      ctx.lineTo(rim.leftX + 10 + sway, rim.y + 34);
+      ctx.lineTo(rim.rightX - 10 + sway, rim.y + 34);
+      ctx.lineTo(rim.rightX, rim.y);
+      ctx.moveTo(rim.leftX + 14, rim.y); ctx.lineTo(rim.leftX + 18 + sway, rim.y + 34);
+      ctx.moveTo(rim.rightX - 14, rim.y); ctx.lineTo(rim.rightX - 18 + sway, rim.y + 34);
+      ctx.stroke();
+
+      // Rim bar
+      ctx.strokeStyle = '#ff6b3d';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(rim.leftX, rim.y);
+      ctx.lineTo(board.x, rim.y);
+      ctx.stroke();
+
+      // Partial dotted trajectory preview while aiming
+      if (!ball.inAir && dragStart && dragCurr) {
+        const launch = computeLaunch(dragCurr.x - dragStart.x, dragCurr.y - dragStart.y);
+        if (launch) {
+          for (let i = 1; i <= 13; i++) {
+            const t = i * 0.042;
+            const px = ball.x + launch.vx * t;
+            const py = ball.y + launch.vy * t + 0.5 * GRAVITY * t * t;
+            ctx.fillStyle = `rgba(201, 251, 99, ${1 - i / 14})`;
+            ctx.beginPath();
+            ctx.arc(px, py, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      }
+
+      // Ball trail ("On Fire" tint at streak >= 3)
+      for (let i = 0; i < ball.trail.length; i++) {
+        const tr = ball.trail[i];
+        const ratio = i / ball.trail.length;
+        ctx.fillStyle = streak >= 3 ? `rgba(255, 165, 60, ${ratio * 0.45})` : `rgba(255, 255, 255, ${ratio * 0.22})`;
+        ctx.beginPath();
+        ctx.arc(tr.x, tr.y, ball.r * ratio * 0.85, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Basketball
+      ctx.fillStyle = '#f27830';
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#401a08';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ball.x - ball.r, ball.y); ctx.lineTo(ball.x + ball.r, ball.y); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ball.x, ball.y - ball.r); ctx.lineTo(ball.x, ball.y + ball.r); ctx.stroke();
+
+      // HUD
+      ctx.fillStyle = '#070d1acc';
+      ctx.fillRect(0, 0, W, 30);
+      ctx.fillStyle = '#f4f7ff';
+      ctx.font = 'bold 14px system-ui';
+      ctx.textAlign = 'left';
+      ctx.fillText(`Score: ${score}`, 12, 20);
+      if (streak >= 2) {
+        ctx.fillStyle = streak >= 3 ? '#ffc878' : '#c9fb63';
+        ctx.fillText(streak >= 3 ? `🔥 ON FIRE x2 (${streak})` : `Streak: ${streak}`, 115, 20);
+      }
+      ctx.textAlign = 'right';
+      ctx.fillStyle = timeLeft < 10 ? '#ff8b8b' : '#75e4e8';
+      ctx.fillText(`Time: ${Math.ceil(timeLeft)}s`, W - 12, 20);
+    }
+  };
+}
+
+/* =========================================================
+   LIFECYCLE, POINTER COORD MAPPING & KEYBOARD EVENTS
+========================================================= */
+function startGame(key, countSession = true) {
+  activeGameKey = key;
+  if (countSession) {
+    store.sessions[key] = (store.sessions[key] || 0) + 1;
+    saveStore();
+    updateStatsUI();
+  }
+  document.querySelectorAll('.gameCard').forEach(el => el.classList.remove('active'));
+  document.getElementById('card-' + key).classList.add('active');
+
+  hideOverlay();
+  particles = [];
+  floatingTexts = [];
+
+  if (key === 'snake') activeGame = createSnakeGame();
+  else if (key === 'football') activeGame = createFootballGame();
+  else activeGame = createBasketballGame();
+
+  document.getElementById('stageTitle').textContent = activeGame.title;
+  document.getElementById('stageHint').textContent = activeGame.hint;
+  document.getElementById('stageControls').innerHTML = activeGame.controlsHTML;
+}
+
+function restartActiveGame() {
+  startGame(activeGameKey, true);
+}
+
+function canvasPoint(e) {
+  const rect = canvas.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * (W / rect.width),
+    y: (e.clientY - rect.top) * (H / rect.height)
+  };
+}
+
+canvas.addEventListener('pointerdown', e => {
+  e.preventDefault();
+  canvas.setPointerCapture(e.pointerId);
+  const pt = canvasPoint(e);
+  if (activeGame && activeGame.onPointerDown) activeGame.onPointerDown(pt.x, pt.y);
+});
+
+canvas.addEventListener('pointermove', e => {
+  const pt = canvasPoint(e);
+  if (activeGame && activeGame.onPointerMove) activeGame.onPointerMove(pt.x, pt.y);
+});
+
+canvas.addEventListener('pointerup', e => {
+  const pt = canvasPoint(e);
+  if (activeGame && activeGame.onPointerUp) activeGame.onPointerUp(pt.x, pt.y);
+});
+
+document.addEventListener('keydown', e => {
+  if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key) &&
+      document.activeElement.tagName !== 'INPUT' &&
+      document.activeElement.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+  }
+  if (activeGame && activeGame.onKey) activeGame.onKey(e);
+});
+
+function mainLoop(now) {
+  const dt = Math.min(0.05, (now - lastFrameTime) / 1000 || 0.016);
+  lastFrameTime = now;
+  if (activeGame) {
+    activeGame.update(dt);
+    activeGame.draw();
+    updateAndDrawFX(dt);
+  }
+  rafId = requestAnimationFrame(mainLoop);
+}
+
+/* =========================================================
+   MODALS FOR PRIVACY, TERMS & CONTACT
+========================================================= */
+function openModal(type) {
+  const titleEl = document.getElementById('modalTitle');
+  const bodyEl = document.getElementById('modalBody');
+  if (type === 'privacy') {
+    titleEl.textContent = 'Privacy Policy';
+    bodyEl.innerHTML = `<p><b>SpryYard Arcade</b> stores your high scores, sound setting, and cookie preference locally in your browser via <code>localStorage</code>. No account registration or in-app purchases exist on this site.</p><p>Before enabling third-party advertising (such as Google AdSense), update this policy with your business name, ad partner disclosures, and UK/EU GDPR contact details.</p>`;
+  } else if (type === 'terms') {
+    titleEl.textContent = 'Terms of Use';
+    bodyEl.innerHTML = `<p>All games on SpryYard Arcade are provided free for personal, non-commercial entertainment. Automated scraping or tampering with ad slots is not permitted.</p>`;
+  } else {
+    titleEl.textContent = 'Contact';
+    bodyEl.innerHTML = `<p>Add your support email address here before publishing (e.g., <b>hello@yourdomain.co.uk</b>) so visitors and ad-network reviewers can reach you.</p>`;
+  }
+  document.getElementById('legalModal').classList.remove('hide');
+}
+
+function closeModal() {
+  document.getElementById('legalModal').classList.add('hide');
+}
+
+/* =========================================================
+   BOOT
+========================================================= */
+document.getElementById('muteBtn').textContent = store.muted ? '🔇 Sound: Off' : '🔊 Sound: On';
+if (!store.consent) showCookieBanner();
+updateStatsUI();
+startGame('snake', false);
+lastFrameTime = performance.now();
+rafId = requestAnimationFrame(mainLoop);
+</script>
+</body>
+</html>
